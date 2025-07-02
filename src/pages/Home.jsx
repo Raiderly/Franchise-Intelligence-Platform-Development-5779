@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useFranchises } from '../hooks/useFranchises'
 import FranchiseCard from '../components/ui/FranchiseCard'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
+import ConnectionTest from '../components/ui/ConnectionTest'
 import SafeIcon from '../common/SafeIcon'
 import * as FiIcons from 'react-icons/fi'
 
@@ -31,6 +32,13 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
+      {/* Development Connection Test - Remove in production */}
+      <div className="bg-gray-100 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ConnectionTest />
+        </div>
+      </div>
+
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary via-secondary to-primary py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
@@ -40,13 +48,11 @@ const Home = () => {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 font-spartan">
-              Intelligent Franchise
-              <br />
+              Intelligent Franchise <br />
               <span className="text-accent-teal">Discovery</span>
             </h1>
             <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
-              Compare franchises, analyze opportunities, and make informed decisions 
-              with AI-powered insights and comprehensive data.
+              Compare franchises, analyze opportunities, and make informed decisions with AI-powered insights and comprehensive data.
             </p>
           </motion.div>
 
@@ -58,10 +64,7 @@ const Home = () => {
             className="max-w-2xl mx-auto mb-12"
           >
             <div className="relative">
-              <SafeIcon 
-                icon={FiSearch} 
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" 
-              />
+              <SafeIcon icon={FiSearch} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
               <input
                 type="text"
                 placeholder="Search for franchises (e.g., McDonald's, fitness, food service...)"
@@ -87,10 +90,7 @@ const Home = () => {
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                  <SafeIcon 
-                    icon={stat.icon} 
-                    className="w-8 h-8 text-accent-teal mx-auto mb-3" 
-                  />
+                  <SafeIcon icon={stat.icon} className="w-8 h-8 text-accent-teal mx-auto mb-3" />
                   <div className="text-2xl font-bold text-white mb-1">
                     {stat.value}
                   </div>
@@ -168,8 +168,7 @@ const Home = () => {
               </div>
               <h3 className="text-xl font-semibold mb-3">Comprehensive Data</h3>
               <p className="text-gray-600">
-                Access detailed information on hundreds of franchise opportunities 
-                with up-to-date financial and operational data.
+                Access detailed information on hundreds of franchise opportunities with up-to-date financial and operational data.
               </p>
             </motion.div>
 
@@ -182,8 +181,7 @@ const Home = () => {
               </div>
               <h3 className="text-xl font-semibold mb-3">Smart Comparisons</h3>
               <p className="text-gray-600">
-                Compare multiple franchises side-by-side with intelligent 
-                highlighting of key differences and advantages.
+                Compare multiple franchises side-by-side with intelligent highlighting of key differences and advantages.
               </p>
             </motion.div>
 
@@ -196,8 +194,7 @@ const Home = () => {
               </div>
               <h3 className="text-xl font-semibold mb-3">AI-Powered Insights</h3>
               <p className="text-gray-600">
-                Get personalized recommendations and industry insights 
-                powered by advanced AI technology.
+                Get personalized recommendations and industry insights powered by advanced AI technology.
               </p>
             </motion.div>
           </div>

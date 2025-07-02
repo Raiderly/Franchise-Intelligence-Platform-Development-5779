@@ -17,8 +17,11 @@ export const useCollections = () => {
 
     try {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('collections')
+      setError(null)
+      
+      // Try user_collections first, fallback to collections
+      let query = supabase
+        .from('user_collections')
         .select(`
           *,
           collection_items (
@@ -29,9 +32,35 @@ export const useCollections = () => {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      let { data, error } = await query
+
+      // If user_collections doesn't exist, try collections table
+      if (error && error.message.includes('relation "user_collections" does not exist')) {
+        query = supabase
+          .from('collections')
+          .select(`
+            *,
+            collection_items (
+              id,
+              franchise_brands (*)
+            )
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        const result = await query
+        data = result.data
+        error = result.error
+      }
+
+      if (error) {
+        console.error('Collections fetch error:', error)
+        throw error
+      }
+
       setCollections(data || [])
     } catch (err) {
+      console.error('Error fetching collections:', err)
       setError(err.message)
     } finally {
       setLoading(false)
@@ -46,56 +75,109 @@ export const useCollections = () => {
     if (!user) return { error: 'User not authenticated' }
 
     try {
-      const { data, error } = await supabase
-        .from('collections')
+      // Try user_collections first, fallback to collections
+      let { data, error } = await supabase
+        .from('user_collections')
         .insert([
-          {
-            name,
-            description,
-            user_id: user.id
-          }
+          { name, description, user_id: user.id }
         ])
         .select()
         .single()
 
-      if (error) throw error
+      // If user_collections doesn't exist, try collections table
+      if (error && error.message.includes('relation "user_collections" does not exist')) {
+        const result = await supabase
+          .from('collections')
+          .insert([
+            { name, description, user_id: user.id }
+          ])
+          .select()
+          .single()
+        
+        data = result.data
+        error = result.error
+      }
+
+      if (error) {
+        console.error('Create collection error:', error)
+        throw error
+      }
+
       await fetchCollections()
       return { data, error: null }
     } catch (err) {
+      console.error('Error creating collection:', err)
       return { data: null, error: err.message }
     }
   }
 
   const updateCollection = async (id, name, description) => {
     try {
-      const { data, error } = await supabase
-        .from('collections')
+      // Try user_collections first, fallback to collections
+      let { data, error } = await supabase
+        .from('user_collections')
         .update({ name, description })
         .eq('id', id)
         .eq('user_id', user.id)
         .select()
         .single()
 
-      if (error) throw error
+      // If user_collections doesn't exist, try collections table
+      if (error && error.message.includes('relation "user_collections" does not exist')) {
+        const result = await supabase
+          .from('collections')
+          .update({ name, description })
+          .eq('id', id)
+          .eq('user_id', user.id)
+          .select()
+          .single()
+        
+        data = result.data
+        error = result.error
+      }
+
+      if (error) {
+        console.error('Update collection error:', error)
+        throw error
+      }
+
       await fetchCollections()
       return { data, error: null }
     } catch (err) {
+      console.error('Error updating collection:', err)
       return { data: null, error: err.message }
     }
   }
 
   const deleteCollection = async (id) => {
     try {
-      const { error } = await supabase
-        .from('collections')
+      // Try user_collections first, fallback to collections
+      let { error } = await supabase
+        .from('user_collections')
         .delete()
         .eq('id', id)
         .eq('user_id', user.id)
 
-      if (error) throw error
+      // If user_collections doesn't exist, try collections table
+      if (error && error.message.includes('relation "user_collections" does not exist')) {
+        const result = await supabase
+          .from('collections')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', user.id)
+        
+        error = result.error
+      }
+
+      if (error) {
+        console.error('Delete collection error:', error)
+        throw error
+      }
+
       await fetchCollections()
       return { error: null }
     } catch (err) {
+      console.error('Error deleting collection:', err)
       return { error: err.message }
     }
   }
@@ -105,18 +187,20 @@ export const useCollections = () => {
       const { data, error } = await supabase
         .from('collection_items')
         .insert([
-          {
-            collection_id: collectionId,
-            brand_id: brandId
-          }
+          { collection_id: collectionId, brand_id: brandId }
         ])
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Add to collection error:', error)
+        throw error
+      }
+
       await fetchCollections()
       return { data, error: null }
     } catch (err) {
+      console.error('Error adding to collection:', err)
       return { data: null, error: err.message }
     }
   }
@@ -129,10 +213,15 @@ export const useCollections = () => {
         .eq('collection_id', collectionId)
         .eq('brand_id', brandId)
 
-      if (error) throw error
+      if (error) {
+        console.error('Remove from collection error:', error)
+        throw error
+      }
+
       await fetchCollections()
       return { error: null }
     } catch (err) {
+      console.error('Error removing from collection:', err)
       return { error: err.message }
     }
   }

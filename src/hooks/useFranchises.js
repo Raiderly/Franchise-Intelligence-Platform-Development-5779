@@ -10,6 +10,8 @@ export const useFranchises = (searchTerm = '', sector = '', sortBy = 'name') => 
     const fetchFranchises = async () => {
       try {
         setLoading(true)
+        setError(null)
+        
         let query = supabase
           .from('franchise_brands')
           .select('*')
@@ -34,9 +36,14 @@ export const useFranchises = (searchTerm = '', sector = '', sortBy = 'name') => 
 
         const { data, error } = await query
 
-        if (error) throw error
+        if (error) {
+          console.error('Franchise fetch error:', error)
+          throw error
+        }
+
         setFranchises(data || [])
       } catch (err) {
+        console.error('Error fetching franchises:', err)
         setError(err.message)
       } finally {
         setLoading(false)
@@ -58,15 +65,22 @@ export const useFranchise = (id) => {
     const fetchFranchise = async () => {
       try {
         setLoading(true)
+        setError(null)
+        
         const { data, error } = await supabase
           .from('franchise_brands')
           .select('*')
           .eq('id', id)
           .single()
 
-        if (error) throw error
+        if (error) {
+          console.error('Single franchise fetch error:', error)
+          throw error
+        }
+
         setFranchise(data)
       } catch (err) {
+        console.error('Error fetching franchise:', err)
         setError(err.message)
       } finally {
         setLoading(false)
